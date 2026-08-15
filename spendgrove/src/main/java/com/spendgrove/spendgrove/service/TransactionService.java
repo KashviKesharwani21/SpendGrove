@@ -45,4 +45,41 @@ public class TransactionService {
         accountRepository.save(account);  // persist the updated balance
         return transactionRepository.save(transaction); // persist the transaction row
     }
+
+    @Transactional
+    public IncomeTransaction addIncome(UUID accountId, UUID categoryId, BigDecimal amount,
+                                       String description, LocalDate date) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found: " + accountId));
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
+
+        IncomeTransaction transaction =
+                new IncomeTransaction(account, category, amount, description, date);
+
+        transaction.apply();              // credits the account
+        accountRepository.save(account);
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public TransferTransaction addTransfer(UUID fromAccountId, UUID toAccountId, BigDecimal amount,
+                                           String description, LocalDate date) {
+
+        Account fromAccount = accountRepository.findById(fromAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("From-account not found: " + fromAccountId));
+
+        Account toAccount = accountRepository.findById(toAccountId)
+                .orElseThrow(() -> new IllegalArgumentException("To-account not found: " + toAccountId));
+
+        TransferTransaction transaction =
+                new TransferTransaction(fromAccount, toAccount, amount, description, date);
+
+        transaction.apply();                  // debits fromAccount, credits toAccount
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);    // both accounts must be persisted
+        return transactionRepository.save(transaction);
+    }
 }
