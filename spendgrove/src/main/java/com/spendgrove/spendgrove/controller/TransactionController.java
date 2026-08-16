@@ -2,6 +2,7 @@ package com.spendgrove.spendgrove.controller;
 
 import com.spendgrove.spendgrove.entity.ExpenseTransaction;
 import com.spendgrove.spendgrove.entity.IncomeTransaction;
+import com.spendgrove.spendgrove.entity.Transaction;
 import com.spendgrove.spendgrove.entity.TransferTransaction;
 import com.spendgrove.spendgrove.service.TransactionService;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
+
 
 @RestController                    // Bean + "returns data directly, not a view"
 @RequestMapping("/api/transactions") // shared URL prefix for every method below
@@ -70,4 +73,9 @@ public class TransactionController {
             UUID fromAccountId, UUID toAccountId, BigDecimal amount,
             String description, LocalDate transactionDate
     ) {}
+
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<Transaction>> getTransactionsForAccount(@PathVariable UUID accountId) {
+        return ResponseEntity.ok(transactionService.getTransactionsForAccount(accountId));
+    }
 }

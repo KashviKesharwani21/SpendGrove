@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 
 @Service  // marks this as a Spring-managed bean holding business logic
 public class TransactionService {
@@ -81,5 +82,14 @@ public class TransactionService {
         accountRepository.save(fromAccount);
         accountRepository.save(toAccount);    // both accounts must be persisted
         return transactionRepository.save(transaction);
+    }
+
+    public List<Transaction> getTransactionsForAccount(UUID accountId) {
+        // confirms the account actually exists before querying its transactions —
+        // avoids silently returning an empty list for a typo'd/nonexistent ID
+        accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Account not found: " + accountId));
+
+        return transactionRepository.findByAccountId(accountId);
     }
 }
