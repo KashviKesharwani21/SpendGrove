@@ -7,6 +7,8 @@ import com.spendgrove.spendgrove.entity.TransferTransaction;
 import com.spendgrove.spendgrove.service.TransactionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,8 +28,7 @@ public class TransactionController {
     }
 
     @PostMapping("/expense")   // handles POST /api/transactions/expense
-    public ResponseEntity<ExpenseTransaction> addExpense(@RequestBody AddExpenseRequest request) {
-        ExpenseTransaction transaction = transactionService.addExpense(
+    public ResponseEntity<ExpenseTransaction> addExpense(@Valid @RequestBody AddExpenseRequest request) {        ExpenseTransaction transaction = transactionService.addExpense(
                 request.accountId(),
                 request.categoryId(),
                 request.amount(),
@@ -39,12 +40,12 @@ public class TransactionController {
 
     // a small nested record representing the expected JSON request body shape
     public record AddExpenseRequest(
-            UUID accountId,
-            UUID categoryId,
-            BigDecimal amount,
+            @NotNull(message = "accountId is required") UUID accountId,
+            @NotNull(message = "categoryId is required") UUID categoryId,
+            @NotNull @Positive(message = "amount must be greater than zero") BigDecimal amount,
             String description,
-            LocalDate transactionDate
-    ){}
+            @NotNull(message = "transactionDate is required") LocalDate transactionDate
+    ) {}
 
     @PostMapping("/income")
     public ResponseEntity<IncomeTransaction> addIncome(@RequestBody AddIncomeRequest request) {
